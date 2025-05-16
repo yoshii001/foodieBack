@@ -1,0 +1,55 @@
+version: '3.8'
+
+networks:
+  foodie-net:
+    driver: bridge
+
+services:
+
+  user-management-service:
+    build: ./user-management-service
+    ports:
+      - "8090:8090"
+    networks:
+      - foodie-net
+    env_file:
+      - ./user-management-service/.env
+
+  restaurant-service:
+    build: ./restaurant-service
+    ports:
+      - "5001:5001"
+    networks:
+      - foodie-net
+    env_file:
+      - ./restaurant-service/.env
+    depends_on:
+      - user-management-service
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "5002:5002"
+    networks:
+      - foodie-net
+    env_file:
+      - ./order-service/.env
+    depends_on:
+      - user-management-service
+      - restaurant-service
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    networks:
+      - foodie-net
+    env_file:
+      - ./api-gateway/.env
+    depends_on:
+      - user-management-service
+      - restaurant-service
+      - order-service
+
+volumes:
+  mongo_data:
